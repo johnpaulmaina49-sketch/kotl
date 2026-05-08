@@ -1,39 +1,44 @@
 package com.example.runningcode.ui.screens
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.runningcode.viewmodel.LessonViewModel
+import com.example.runningcode.data.Lesson
+import com.example.runningcode.loadLessonsFromAssets
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LessonDetailScreen(
     lessonId: Int,
-    onBack: () -> Unit,
-    viewModel: LessonViewModel = viewModel()
+    onBack: () -> Unit
 ) {
-    val lesson = viewModel.getLessonById(lessonId)
+    val context = LocalContext.current
+    val lessons = remember { loadLessonsFromAssets(context) }
+    val lesson = lessons.find { it.id == lessonId }
+        ?: Lesson(0, "Error", "Lesson not found.")
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(lesson?.title ?: "Lesson") },
+                title = { Text(lesson.title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -48,13 +53,11 @@ fun LessonDetailScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (lesson == null) {
-                Text("Lesson not found")
-            } else {
-                Text(lesson.title, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(lesson.content)
-            }
+            Text(
+                text = lesson.content,
+                style = MaterialTheme.typography.bodyLarge,
+                fontFamily = FontFamily.Serif
+            )
         }
     }
 }
